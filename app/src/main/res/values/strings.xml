@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Register Payments</string>
+    <string name="record_audio">Hablar gasto/compra</string>
+    <string name="transcript_placeholder">Texto reconocido: (vacío)</string>
+    <string name="item_hint">Qué compré (ej: café)</string>
+    <string name="place_hint">Dónde (ej: supermercado)</string>
+    <string name="amount_hint">Monto (opcional)</string>
+    <string name="save_expense">Guardar en servidor</string>
+    <string name="status_idle">Estado: esperando</string>
+</resources>
