@@ -39,16 +39,35 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
-      - name: Ensure Android SDK components (if missing)
+      - name: Install Android SDK command-line tools and required components
+        # descargamos commandlinetools, lo movemos a cmdline-tools/latest y usamos sdkmanager
         run: |
-          # Ajusta la versión de plataforma y build-tools según tu compileSdkVersion
-          yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+          set -e
+          mkdir -p ${ANDROID_SDK_ROOT}
+          cd ${ANDROID_SDK_ROOT}
+          # Descarga command-line tools (versión estable; puede requerir actualizar si caduca)
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O commandlinetools.zip
+          mkdir -p cmdline-tools
+          unzip -q commandlinetools.zip -d cmdline-tools
+          # Mover al layout esperado: cmdline-tools/latest
+          if [ -d "cmdline-tools/cmdline-tools" ]; then
+            mv cmdline-tools/cmdline-tools cmdline-tools/latest
+          else
+            mv cmdline-tools/* cmdline-tools/latest
+          fi
+          rm -f commandlinetools.zip
+          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+          # Instalar platform-tools, plataforma y build-tools. Ajusta android-33 y build-tools si tu proyecto requiere otra versión.
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+          # Aceptar licencias
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
         shell: bash
 
       - name: Build debug APK with Gradle
         env:
           JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+          PATH: ${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin:${PATH}
         run: gradle clean assembleDebug --no-daemon --stacktrace
 
       - name: Upload debug APK artifact
@@ -56,4 +75,3 @@ jobs:
         with:
           name: app-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-          # retention-days: 7   # opcional: ajustar retención si querés
