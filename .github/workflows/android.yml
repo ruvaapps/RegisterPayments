@@ -56,14 +56,13 @@ jobs:
             mv cmdline-tools/* cmdline-tools/latest
           fi
           rm -f commandlinetools.zip
-          # Prepend Java + SDK tools al PATH local del script, preservando PATH del sistema
+          # Preparar PATH local para este script (preservando el PATH del sistema)
           export PATH="${JAVA_HOME}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:$PATH"
-          # Instalar platform-tools, plataforma y build-tools (ajusta versiones si es necesario)
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" "platform-tools" "platforms;android-33" "build-tools;33.0.0"
-          # Aceptar licencias (ignorar posible "Broken pipe" que no afecta la instalación)
+          # Instalar platform-tools y la plataforma/build-tools que coincide con compileSdk (34)
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          # Aceptar licencias (evitamos que 'Broken pipe' haga fallar el step)
           printf 'y\n' | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
         shell: bash
-
 
       - name: Build debug APK with Gradle
         env:
