@@ -37,8 +37,15 @@ app/build/
 expenses.db
 *.keystore
 keystore.jks
+# ...
 *.properties
 
+# Allow gradle.properties in the repo (used by CI)
+!gradle.properties
+
+# Keep local.properties ignored
+/local.properties
+# ...
 # OS files
 Thumbs.db
 ehthumbs.db
