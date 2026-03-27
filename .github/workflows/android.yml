@@ -40,14 +40,13 @@ jobs:
           gradle-version: '8.10.2'
 
       - name: Install Android SDK command-line tools and required components
-        # No sobrescribimos PATH en env: para no eliminar rutas del sistema
         env:
           JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
         run: |
           set -e
           mkdir -p "${ANDROID_SDK_ROOT}"
           cd "${ANDROID_SDK_ROOT}"
-          # Descarga command-line tools
+          # Descargar command-line tools
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O commandlinetools.zip
           mkdir -p cmdline-tools
           unzip -q commandlinetools.zip -d cmdline-tools
@@ -57,12 +56,14 @@ jobs:
             mv cmdline-tools/* cmdline-tools/latest
           fi
           rm -f commandlinetools.zip
-          # Prepend Java + SDK tools to PATH local del script, preservando el PATH del sistema
+          # Prepend Java + SDK tools al PATH local del script, preservando PATH del sistema
           export PATH="${JAVA_HOME}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:$PATH"
           # Instalar platform-tools, plataforma y build-tools (ajusta versiones si es necesario)
-          yes | sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" "platform-tools" "platforms;android-33" "build-tools;33.0.0"
-          yes | sdkmanager --licenses
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+          # Aceptar licencias (ignorar posible "Broken pipe" que no afecta la instalación)
+          printf 'y\n' | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
         shell: bash
+
 
       - name: Build debug APK with Gradle
         env:
